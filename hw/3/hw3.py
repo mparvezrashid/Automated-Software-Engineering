@@ -1,6 +1,6 @@
 import re, sys
 from Num import Num
-from collections import Counter
+from collections import Counter, defaultdict
 
 class THE:
     sep = ","
@@ -35,6 +35,7 @@ class Tbl(Mine):
     listOfRead = []  # processed output from read
     listOfRow = []  # list of row objects
     listOfCol = []  # list of col object
+    listOfMy = []
     NUMCOL=[]
     table=[]
     GOALCOL=[]
@@ -57,42 +58,66 @@ class Tbl(Mine):
         #print(Tbl.Cell)
             if n == 0:  # check init title list is empty
                 self.listOfCol = [Col(i, t) for i, t in enumerate(cell)]
+                self.listOfMy = [My(i, t) for i, t in enumerate(cell)]
                         
     
     def dump(self):
         [print(c) for c in self.listOfCol]
-        [print(r) for r in self.listOfRow]
+        [print(m) for m in self.listOfMy]
+        
+class My(Mine):
+    
+    def __init__(self, pos=0, txt=None):
+        goal=[]
+        self.identify()
+        print(self.__class__.__name__)
+        for a,b,c in Tbl.table:
+            
+            if a[1]=='goals':
+                goal.append(b[1])
+        self.goals=goal    
+        
 
 
 class Col(Mine):
     
     def __init__(self, pos=0, txt=None):
-        self.identify()
-        self.pos = pos
+        #self.identify()
+        #self.pos = pos
+        #print(self.__class__.__name__)
         self.txt = txt
         #print(Tbl.table)
         for a,b,c in Tbl.table:
             #print(b)
+            print("| "+str(b[1]+1)+"\n")
             if b[0] == txt:
-               #print(a[0])
+               #print(a)
                if a[0]=='Num1':
                   #print(c)
                   numAddInstance = Num()
                   exp=0
+                  
                   for colval in c:
                       #print(colval)
                       numAddInstance + colval
-                         
+                      
+                  print("| | |"+"Num1")        
                   self.mu=(round(numAddInstance.expect(), 2))
                   self.hi= numAddInstance.hi
                   self.lo= numAddInstance.lo
                   self.m2= round(numAddInstance.m2,2)
                   self.sd= round(numAddInstance.sd(),2)
-                  self.n=14
+                  self.n=len(c)
+                  self.col=b[1]+1
                else:
                    #print(c)
                    sym1 = Sym1()
+                   self.add="Sum1"
                    self.mode = sym1.mode(c)
+                   self.most = c.count(self.mode)
+                   self.n=len(c)
+                   self.col=b[1]+1
+                   self.cnt=sym1.count(c)
                        
 
 
@@ -105,6 +130,9 @@ class Sym1:
         count = col.count(max(col,key=col.count))
         print(count)
         return (max(col,key=col.count))
+    def count(self,col=[]):
+        print(Counter(col))
+        return Counter(col)    
               
           
 
@@ -152,11 +180,18 @@ def cols(src):
                     usedCol.append(n)
                     if re.search(THE.NUMCOL,cell):
                         Tbl.NUMCOL.append(n)
-                        Tbl.table.append([["Num1"],[cell],[]])
+                        if '<' in cell:
+                            Tbl.table.append([["Num1","goals"],[cell,n,-1],[]])
+                        else:
+                            Tbl.table.append([["Num1","goals"],[cell,n,1],[]])
+                        
                     else:
                         #re.search(THE.GOALCOL,cell):
                         #Tbl.GOALCOL.append(n)
-                        Tbl.table.append([["Sym1"],[cell],[]])     
+                        if '!' in cell:
+                            Tbl.table.append([["Sym1","goals"],[cell,n,1],[]])
+                        else:
+                            Tbl.table.append([["Sym1","xs"],[cell,n,1],[]])
                 #print(Tbl.table)
         #print("Hello")        
         #print(cells[n] for n in usedCol)                  
@@ -219,8 +254,96 @@ def prep(x):
     for c in [THE.num, THE.less, THE.more]:
         if c in x:
             return num
-    return num(x)        
+    return num(x) 
 
+class ABCD:
+    def __init__(self):
+
+        self.db="Data"
+        self.num = 0
+        self.rx="rx"
+        self.a=defaultdict(lambda: 0)
+        self.b=defaultdict(lambda: 0)
+        self.c=defaultdict(lambda: 0)
+        self.d=defaultdict(lambda: 0)
+        self.known=defaultdict(lambda: 0)
+        self.yes=0
+        self.no=0
+      
+
+    def Abcd1(self,want, got, x=0):
+        self.num += 1
+        if self.known[want] == 0:
+            self.known[want] +=1
+            self.a[want]= self.yes + self.no
+            print(want,self.a[want])
+        '''if self.known[want] == 1:
+            self.a[want]= self.yes + self.no
+            print(want,self.a[want]) '''
+        if self.known[got] == 0:
+            self.known[got] +=1
+            self.a[got]= self.yes + self.no
+            print(got, self.a[got])
+        '''if self.known[got] == 1:
+            self.a[got]= self.yes + self.no
+            print(got, self.a[got])'''     
+        
+        if want == got : self.yes+=1
+        else : self.no+=1
+        print(self.known)
+        for x in self.known:
+            #print(x)
+            if want == x: 
+                if want == got:
+                    self.d[x]+=1 
+                else: self.b[x]+=1
+            else: 
+                if got == x : self.c[x]+=1 
+                else: 
+                    self.a[x]+=1
+                    print(x,self.a[x])
+      
+#def AbcdReport(self,x,p,q,r,s,ds,pd,pf pn,prec,g,f,acc,a,b,c,d) {
+    def AbcdReport(self) :
+        p = " %4.2f"
+        q = " %4s"
+        r = " %5s"
+        s = " |"
+        ds= "----"
+        '''print(r s r s r s r s r s r s r s q s q s q s q s q s q s " class\n",
+              "db","rx","num","a","b","c","d","acc","pre","pd","pf","f","g")
+        print(r  s r s r s r s r s r s r s q s q s q s q s q s q s "-----\n",
+              ds,ds,"----",ds,ds,ds,ds,ds,ds,ds,ds,ds,ds)'''
+        print("    db |    rx |   num |     a |     b |     c |     d |  acc |  pre |   pd |   pf |    f |    g | class\n") 
+        print("  ---- |  ---- |  ---- |  ---- |  ---- |  ---- |  ---- | ---- | ---- | ---- | ---- | ---- | ---- | -----\n")  
+        for x in self.known:
+            pd = pf = pn = prec = g = f = acc = 0
+            a = self.a[x]
+            b = self.b[x]
+            c = self.c[x]
+            d = self.d[x]
+            if b+d > 0 : pd   = round(d     / (b+d),2) 
+            if a+c > 0 : pf   = round(c     / (a+c),2) 
+            if a+c > 0 : pn   = round((b+d) / (a+c),2) 
+            if c+d > 0 : prec = round(d     / (c+d),2) 
+            if 1-pf+pd > 0 : g=round(2*(1-pf) * pd / (1-pf+pd),2) 
+            if prec+pd > 0 : f=round(2*prec*pd / (prec + pd),2)   
+            if self.yes + self.no > 0 :
+                #print(self.yes, self.yes + self.no)
+                acc  = round(self.yes / (self.yes + self.no),2)
+                #print(acc)
+            print("{:7s}|".format(self.db) + "{:7s}|".format(self.rx) + "{:7d}|".format(self.num) + "{:7d}|".format(a) + "{:7d}|".format(b) + "{:7d}|".format(c) + "{:7d}|".format(d) + "{:7f}|".format(acc) + "{:7f}|".format(prec) + "{:7f}|".format(pd) + "{:7f}|".format(pf) + "{:7f}|".format(f) + "{:7f}|".format(g) + "{:7s}".format(x) + '\n')
+        
+
+def Abcd():
+    #print("Abcd")
+    abcd = ABCD()
+    for j in range(6): abcd.Abcd1("yes", "yes")
+    for j in range(2): abcd.Abcd1("no", "no")
+    for j in range(5): abcd.Abcd1("maybe", "maybe")
+    
+    abcd.Abcd1("maybe","no")
+    abcd.AbcdReport()
 
 def main():
     file="""
@@ -246,6 +369,7 @@ rainy, 71, 91, TRUE, no
     
     tbl.dump()
     #print(tbl.table)
+    Abcd()
 
 
    
