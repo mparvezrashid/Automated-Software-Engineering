@@ -1,3 +1,4 @@
+t.cols
 | 1
 | | | add: Sum1
 | | | cnt:
