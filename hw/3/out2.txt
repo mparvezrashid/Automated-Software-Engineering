@@ -1,4 +1,59 @@
-Col{mode='rainy', oid=2, pos=0, txt='outlook'}
-Col{hi=96, lo=65, m2=1375.21, mu=81.64, n=14, oid=3, pos=1, sd=10.29, txt='<humid'}
-Col{mode='FALSE', oid=4, pos=2, txt='wind'}
-Col{mode='yes', oid=5, pos=3, txt='!play'}
+| 1
+| | | add: Sum1
+| | | cnt:
+| | | |  rainy:5
+| | | |  sunny:5
+| | | |  overcast:4
+| | | mode: rainy
+| | | most: 5
+| | | n: 14
+| | | oid: 1
+| | | text: outlook
+| 3
+| | | add: Num1
+| | | mu: 81.64
+| | | hi: 96
+| | | lo: 65
+| | | m2: 1375.21
+| | | sd: 10.29
+| | | n: 14
+| 4
+| | | add: Sum1
+| | | cnt:
+| | | |  FALSE:8
+| | | |  TRUE:6
+| | | mode: FALSE
+| | | most: 8
+| | | n: 14
+| | | oid: 1
+| | | text: wind
+| 5
+| | | add: Sum1
+| | | cnt:
+| | | |  yes:9
+| | | |  no:5
+| | | mode: yes
+| | | most: 9
+| | | n: 14
+| | | oid: 1
+| | | text: !play
+t.my
+| class=5
+| goals
+| | 3
+| | 5
+| nums
+| | 3
+| syms
+| | 1
+| | 4
+| | 5
+| w
+| | 3: -1
+| xnums
+| xs
+| | 1
+| | 4
+| xsyms
+| | 1
+| | 4
