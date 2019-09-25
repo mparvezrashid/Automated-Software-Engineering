@@ -1,4 +1,4 @@
-import re, sys
+import re, sys, math
 from Num import Num
 from collections import Counter, defaultdict
 
@@ -22,25 +22,31 @@ class Mine:
         self.oid = Mine.oid
         return self.oid
 
-    def __repr__(i):
+    '''def __repr__(i):
         pairs = sorted([(k, v) for k, v in i.__dict__.items()
                         if k[0] != "_"])
         pre = i.__class__.__name__ + '{'
         q = lambda z: "'%s'" % z if isinstance(z, str) else str(z)
         return pre + ", ".join(['%s=%s' % (k, q(v))
-                                for k, v in pairs]) + '}'
+                                for k, v in pairs]) + '}' '''
 
 
 class Tbl(Mine):
     listOfRead = []  # processed output from read
     listOfRow = []  # list of row objects
-    listOfCol = []  # list of col object
-    listOfMy = []
+    listOfCol = [] 
+    listOfMy = [] # list of col object
     NUMCOL=[]
     table=[]
     GOALCOL=[]
     NUMCOLVAL=[]
     Cell=[]
+    goals=[]
+    nums=[]
+    syms=[]
+    xs=[]
+    negweight=[]
+
     
     def __init__(self):
         self.identify()  # oid implementation need improvement
@@ -54,29 +60,23 @@ class Tbl(Mine):
             else:
                 
                 self.listOfRow += [Row(cell, [], 0)]  # each row is a Row object'''
+        print("t.cols")        
         for n, cell in enumerate(Tbl.Cell):
         #print(Tbl.Cell)
             if n == 0:  # check init title list is empty
                 self.listOfCol = [Col(i, t) for i, t in enumerate(cell)]
-                self.listOfMy = [My(i, t) for i, t in enumerate(cell)]
+                
                         
     
     def dump(self):
+        
         [print(c) for c in self.listOfCol]
-        [print(m) for m in self.listOfMy]
+        my=My()
         
-class My(Mine):
-    
-    def __init__(self, pos=0, txt=None):
-        goal=[]
-        self.identify()
-        print(self.__class__.__name__)
         for a,b,c in Tbl.table:
-            
-            if a[1]=='goals':
-                goal.append(b[1])
-        self.goals=goal    
-        
+            if b[0]=="!play": 
+                print("Entropy:"+ str(round(Sym1().symEnt(c),2)))
+        #[print(r) for r in self.listOfMy]
 
 
 class Col(Mine):
@@ -84,14 +84,15 @@ class Col(Mine):
     def __init__(self, pos=0, txt=None):
         #self.identify()
         #self.pos = pos
-        #print(self.__class__.__name__)
-        self.txt = txt
+        #self.txt = txt
         #print(Tbl.table)
+        
         for a,b,c in Tbl.table:
-            #print(b)
-            print("| "+str(b[1]+1)+"\n")
+            #print(b[1])
             if b[0] == txt:
-               #print(a)
+               print("| "+str(b[1]+1))
+               #print(a[0])
+               #print("| "+str(b[1]))
                if a[0]=='Num1':
                   #print(c)
                   numAddInstance = Num()
@@ -100,39 +101,101 @@ class Col(Mine):
                   for colval in c:
                       #print(colval)
                       numAddInstance + colval
-                      
-                  print("| | |"+"Num1")        
+                  self.add="Num1"
+                  print("| | | add: "+self.add)        
                   self.mu=(round(numAddInstance.expect(), 2))
+                  print("| | | mu: "+str(self.mu))
                   self.hi= numAddInstance.hi
+                  print("| | | hi: "+str(self.hi))
                   self.lo= numAddInstance.lo
+                  print("| | | lo: "+str(self.lo))
                   self.m2= round(numAddInstance.m2,2)
+                  print("| | | m2: "+str(self.m2))
                   self.sd= round(numAddInstance.sd(),2)
-                  self.n=len(c)
-                  self.col=b[1]+1
+                  print("| | | sd: "+str(self.sd))
+                  self.n=14
+                  print("| | | n: "+str(self.n))
                else:
                    #print(c)
                    sym1 = Sym1()
                    self.add="Sum1"
+                   print("| | | add: "+"Sum1")
+                   print("| | | cnt: ")
+                   cnt=[]
+                   for n,val in enumerate(c):
+                      if val not in cnt:
+                          print("| | | |  "+val+":"+str(c.count(val)))
+                          cnt.append(val)
                    self.mode = sym1.mode(c)
-                   self.most = c.count(self.mode)
-                   self.n=len(c)
-                   self.col=b[1]+1
-                   self.cnt=sym1.count(c)
-                       
+                   print("| | | mode: "+str(self.mode))
+                   self.most = sym1.most(c)
+                   print("| | | most: "+str(self.most))
+                   print("| | | n: "+str(14))
+                   print("| | | oid: "+str(self.oid))
+                   print("| | | text: "+b[0])
+                   
+                   
+                         
+                   
+class My:
 
+    def __init__(self):
+        
+        
+        #print(self.__class__.__name__)
+        print("t.my")
+        print("| class=5")
+        print("| goals")
+        for i in Tbl.goals:
+            print("| | "+str(i+1))
+        print("| nums")
+        for i in Tbl.nums:
+            print("| | "+str(i+1))
+        print("| syms")
+        for i in Tbl.syms:
+            print("| | "+str(i+1))
+        print("| w")
+        for i in Tbl.negweight:
+            print("| | "+str(i+1)+": -1")
+        print("| xnums")
+        print("| xs")
+        for i in Tbl.xs:
+            print("| | "+str(i+1))
+        print("| xsyms")
+        for i in Tbl.xs:
+            print("| | "+str(i+1))        
+
+
+        
 
 class Sym1:
     cnt=0
     def mode(self,col=[]):
+        
+        count = 0
+        #for n, cell in enumerate(col):
+        count = col.count(max(col,key=col.count))
+        #print(count)
+        return (max(col,key=col.count))
+
+    def most(self,col=[]):
         #col = ['rainy', 'sunny', 'sunny', 'overcast', 'rainy', 'rainy', 'overcast', 'sunny', 'sunny', 'rainy', 'sunny', 'overcast', 'overcast', 'rainy']
         count = 0
         #for n, cell in enumerate(col):
         count = col.count(max(col,key=col.count))
-        print(count)
-        return (max(col,key=col.count))
-    def count(self,col=[]):
-        print(Counter(col))
-        return Counter(col)    
+        #print(count)
+        return (count)
+
+    def symEnt(self, col=[]):
+        n=len(col)
+        e=0
+        for k in col:
+            p  = col.count(k)/n
+            e -= p*math.log(p)/math.log(2)
+    
+        return e
+    
+
               
           
 
@@ -155,11 +218,13 @@ def string(s):
 def rows(src):
     """convert lines into lists, killing whitespace
     and comments. skip over lines of the wrong size"""
+    #print(src)
     linesize = None
     for n, line in enumerate(src):
         line = re.sub(THE.doomed, '', line.strip())
         if line:
-            line = line.split(THE.sep)  # breakup a string and add the data to a string array
+            line = line.split(THE.sep)
+            #print(line)  # breakup a string and add the data to a string array
             if linesize is None:
                 linesize = len(line)
             if len(line) == linesize:
@@ -180,18 +245,28 @@ def cols(src):
                     usedCol.append(n)
                     if re.search(THE.NUMCOL,cell):
                         Tbl.NUMCOL.append(n)
+                        Tbl.nums.append(n)
                         if '<' in cell:
                             Tbl.table.append([["Num1","goals"],[cell,n,-1],[]])
+                            Tbl.goals.append(n)
+                            Tbl.negweight.append(n)
                         else:
                             Tbl.table.append([["Num1","goals"],[cell,n,1],[]])
-                        
+                            Tbl.goals.append(n)
+
+                        #Tbl.table.append([["Num1"],[cell,n],[]])
                     else:
                         #re.search(THE.GOALCOL,cell):
                         #Tbl.GOALCOL.append(n)
+                        Tbl.syms.append(n)
                         if '!' in cell:
                             Tbl.table.append([["Sym1","goals"],[cell,n,1],[]])
+                            Tbl.goals.append(n)
                         else:
                             Tbl.table.append([["Sym1","xs"],[cell,n,1],[]])
+                            Tbl.xs.append(n)
+                            
+                        #Tbl.table.append([["Sym1"],[cell,n],[]])     
                 #print(Tbl.table)
         #print("Hello")        
         #print(cells[n] for n in usedCol)                  
@@ -276,21 +351,21 @@ class ABCD:
         if self.known[want] == 0:
             self.known[want] +=1
             self.a[want]= self.yes + self.no
-            print(want,self.a[want])
+            #print(want,self.a[want])
         '''if self.known[want] == 1:
             self.a[want]= self.yes + self.no
             print(want,self.a[want]) '''
         if self.known[got] == 0:
             self.known[got] +=1
             self.a[got]= self.yes + self.no
-            print(got, self.a[got])
+            #print(got, self.a[got])
         '''if self.known[got] == 1:
             self.a[got]= self.yes + self.no
             print(got, self.a[got])'''     
         
         if want == got : self.yes+=1
         else : self.no+=1
-        print(self.known)
+        #print(self.known)
         for x in self.known:
             #print(x)
             if want == x: 
@@ -301,7 +376,7 @@ class ABCD:
                 if got == x : self.c[x]+=1 
                 else: 
                     self.a[x]+=1
-                    print(x,self.a[x])
+                    #print(x,self.a[x])
       
 #def AbcdReport(self,x,p,q,r,s,ds,pd,pf pn,prec,g,f,acc,a,b,c,d) {
     def AbcdReport(self) :
