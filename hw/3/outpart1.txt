@@ -1,4 +1,0 @@
-Col{mode='rainy', oid=2, pos=0, txt='outlook'}
-Col{hi=96, lo=65, m2=1375.21, mu=81.64, n=14, oid=3, pos=1, sd=10.29, txt='<humid'}
-Col{mode='FALSE', oid=4, pos=2, txt='wind'}
-Col{mode='yes', oid=5, pos=3, txt='!play'}
