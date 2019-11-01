@@ -4,9 +4,8 @@ class Col:
     
     def __init__(self,Num, cols,OID):
         
-        
-        print("| | add: "+str(cols[0]+1))
-        print("| | col: "+str(cols[1])+"\n")
+        print("| | add: "+"num1")
+        print("| | col: "+str(cols[0]+1))
         print("| | hi:"+str(Num.hi)+"\n")
         print("| | lo:"+str(Num.lo)+"\n")
         print("| | m2:"+str(round(Num.m2,2))+"\n")
@@ -14,6 +13,7 @@ class Col:
         print("| | n:"+str(14)+"\n")
         print("| | OID:"+str(OID)+"\n")
         print("| | sd:"+str(round(Num.sd(),2))+"\n")
+        print("| | txt: "+str(cols[1])+"\n")
 class Row:
     def __init__(self, row, OID):
         c=1
@@ -39,9 +39,20 @@ class CrtTbl:
         self.OID=1
         
     def read(self, s):
+       linesize = None
        for line in s.splitlines():
-           print(line)
-           yield line
+              line = re.sub(r'([\n\t\r]|#.*)', '', line.strip())
+              if len(line)>0:
+                  
+                  line = line.split(',')
+                  if linesize is None:
+                      linesize = len(line)
+                  if len(line) == linesize:
+                      print(line)
+                  else:
+                      print("E> skipping line %s" % n, file=sys.stderr)   
+       print("") 
+           #yield line
 
     def read_line(self,s):
         lnsz=None
@@ -117,6 +128,25 @@ class CrtTbl:
 
 
 def main():
+    f="""
+$cloudCover, $temp, $humid, $wind,  $playHours
+  100,         68,    80,     0,      3   
+  0,           85,    85,     0,      0
+  0,           80,    90,     10,     0
+  60,          83,    86,     0,      4
+  100,         70,    96,     0,      3
+  100,         65,    70,     20,     0
+  70,          64,    65,     15,     5
+  0,           72,    95,     0,      0
+  0,           69,    70,     0,      4
+  80,          75,    80,     0,      3
+  0,           75,    70,     18,     4
+  60,          72,    83,     15,     5
+  40,          81,    75,     0,      2
+  100,         71,    91,     15,     0
+  """
+   
+    
     file="""
 $cloudCover, $temp, $humid, $wind,  $playHours
   100,         68,    80,     0,      3   
@@ -134,8 +164,9 @@ $cloudCover, $temp, $humid, $wind,  $playHours
   40,          81,    75,     0,      2
   100,         71,    91,     15,     0
   """
-
+    
     tbl = CrtTbl()
+    tbl.read(f)
     tbl.read_line(file)
     
 
@@ -151,4 +182,4 @@ $cloudCover, $temp, $humid, $wind,  $playHours
 
 if __name__ == "__main__":
     main()        
-   
+     
